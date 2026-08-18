@@ -1,0 +1,242 @@
+{
+  "name": "My workflow 5",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are an appointment assistant.\n\nWhen the user asks about an appointment, use the Google Sheets tool.\n\nUse the tool exactly as defined.\n\nNever invent tool parameters.\n\nOnly provide parameters requested by the tool schema.\n\nAfter receiving the tool result, answer the user naturally.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -256,
+        -64
+      ],
+      "id": "db99f6a4-3f8d-4896-b9bf-9c2628ca18cb",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        -256,
+        144
+      ],
+      "id": "c643419e-00f9-4e71-ac96-0fcabb75da48",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "You are an appointment assistant.\n\nIf the user asks about an appointment, extract the appointment ID (for example APT1001).\n\nCall the Google Sheets tool.\n\nProvide ONLY this parameter:\n\nappointment_id\n\nAfter receiving the result, answer the user naturally.\n\nIf no row is found, say the appointment does not exist.",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1m-OvmAOYMqv7GFcDr3HAr4Z3Dk6Glse0FAMv10NBNDc/edit",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "=Appointments",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "=Appointment ID",
+              "lookupValue": "{{$fromAI(\"appointment_id\")}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -112,
+        144
+      ],
+      "id": "d153cd1f-24c9-4f33-866b-ed393a349e93",
+      "name": "Get row(s) in sheet in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7i3SqSqpGyTWEbnU",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "llama-3.1-8b-instant",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGroq",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        160
+      ],
+      "id": "14d453be-525f-478a-b9ae-8cf8e2bd2699",
+      "name": "Groq Chat Model",
+      "credentials": {
+        "groqApi": {
+          "id": "uACr2aqLYrDQBUDu",
+          "name": "Groq account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1SspwG8ovbFCLpcXIfeBzwd9wsP5TMbhtar-UUG67cyQ/edit?gid=1289841935#gid=1289841935",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Appointments",
+          "mode": "name"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        32,
+        96
+      ],
+      "id": "301a51e1-067a-4f56-a22f-a8ffda33abcf",
+      "name": "Get row(s) in sheet in Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "7i3SqSqpGyTWEbnU",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -640,
+        -48
+      ],
+      "id": "f61a4aa1-8a8b-4e76-aa8a-6a41c1aedcbe",
+      "name": "WhatsApp Trigger",
+      "webhookId": "92601425-b918-4fdd-8fdc-1f5e6476e210",
+      "credentials": {
+        "whatsAppTriggerApi": {
+          "id": "4wDvPw7hbJs2SnRT",
+          "name": "WhatsApp OAuth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1.1,
+      "position": [
+        -464,
+        -48
+      ],
+      "id": "345141ec-14c5-41f2-8777-7528906f51fb",
+      "name": "Send message",
+      "webhookId": "3b5dae16-9b8e-4dc7-a14a-c355acb46f31"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Groq Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet in Google Sheets1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "Send message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send message": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "4f03a959-a485-43be-8efe-a68d70b4d3af",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "cfc416dc2df11256f8290f111525cba9c212b84e2d0b375205cf3278d8664862"
+  },
+  "nodeGroups": [],
+  "id": "WMiQlB5p8mxFxua3w2_p2",
+  "tags": []
+}
